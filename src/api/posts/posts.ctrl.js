@@ -65,6 +65,12 @@ exports.list = async (ctx) => {
     // page가 주어지니 않았다면 1로 간주한다.
     // query는 문자열 형태로 받아 오므로 숫자로 변환
     const page = parseInt(ctx.query.page || 1, 10);
+    const { tag } = ctx.query;
+
+    // query 조건 (where)
+    const query = tag ? {
+        tags: tag // tags 배열에 tag를 가진 포스트 찾기
+    } : {};
 
     // 잘못된 페이지가 주어졌다면 오류
     if(page < 1) {
@@ -73,7 +79,7 @@ exports.list = async (ctx) => {
     }
 
     try {
-        const posts = await Post.find()
+        const posts = await Post.find(query)
                             .sort({_id: -1})
                             .limit(10)
                             .skip((page - 1) * 10)
@@ -164,11 +170,11 @@ exports.replace = (ctx) => {
  * PATCH /api/posts/:id
  * { title, body }
  */
-exports.update = (ctx) => {
+exports.update = async (ctx) => {
     //PATCh 메서드는 주어진 필드만 교체한다.    
     const {id} = ctx.params;
     try{
-        const post = awaite Post.findByIdAndRemove(id, ctx.request.boxy, {
+        const post = await Post.findByIdAndRemove(id, ctx.request.boxy, {
             new: true
             // 이 값을 설정해야 업데이트된 객체를 반환합니다.
             // 설정하지 않으면 업데이터되기 전의 객체를 반환합니다.
