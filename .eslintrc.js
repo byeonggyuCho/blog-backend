@@ -3,6 +3,11 @@ module.exports = {
     es6: true,
     node: true,
   },
+  settings: { // 절대경로로 파일찾기.
+    "import/resolver": {
+      node: {paths: [path.resolve('./src')]}
+    }
+  },
   extends: [
     'airbnb-base',
   ],

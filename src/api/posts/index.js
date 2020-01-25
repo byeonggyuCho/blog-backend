@@ -5,9 +5,9 @@ const posts = new Router();
 
 posts.get('/', postsCtrl.list);
 posts.get('/:id', postsCtrl.read);
-posts.post('/', postsCtrl.write);
-posts.delete('/', postsCtrl.remove);
-posts.put('/', postsCtrl.replace);
-posts.patch('/', postsCtrl.update);
+posts.post('/', postsCtrl.checkObjectId,postsCtrl.write);
+posts.delete('/', postsCtrl.checkObjectId, postsCtrl.remove);
+posts.patch('/', postsCtrl.checkObjectId, postsCtrl.update);
+// posts.put('/', postsCtrl.replace);
 
 module.exports = posts;
