@@ -190,3 +190,15 @@ exports.update = async (ctx) => {
         ctx.throw(e, 500);
     }
 }
+
+
+/**
+ * 로그인 여부 체크
+ */
+ exports.checkLogin = (ctx, next) => {
+     if(!ctx.session.logged) {
+         ctx.status = 401; // Unathorized
+         return null;
+     }
+     return next();
+ };

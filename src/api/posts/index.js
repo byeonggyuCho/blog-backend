@@ -3,11 +3,13 @@ const postsCtrl = require('./posts.ctrl');
 
 const posts = new Router();
 
-posts.get('/', postsCtrl.list);
-posts.get('/:id', postsCtrl.read);
-posts.post('/', postsCtrl.checkObjectId,postsCtrl.write);
-posts.delete('/', postsCtrl.checkObjectId, postsCtrl.remove);
-posts.patch('/', postsCtrl.checkObjectId, postsCtrl.update);
-// posts.put('/', postsCtrl.replace);
+const {list, read, checkObjectId, write, remove, update, checkLogin } = postsCtrl;
+
+posts.get('/',      list);
+posts.get('/:id',   checkObjectId,  read);
+// 로그인 여부 체크
+posts.post('/',     checkLogin,     write);
+posts.delete('/',   checkLogin,     checkObjectId, remove);
+posts.patch('/',    checkLogin,     checkObjectId, update);
 
 module.exports = posts;
