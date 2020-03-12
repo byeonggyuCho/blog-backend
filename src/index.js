@@ -2,12 +2,11 @@ require('dotenv').config();
 
 const mongoose = require('mongoose');
 const session = require('koa-session');
+const config = require('./config/config.js')
+const { port, mongoURI, signKey} = config;
 
-const {
-  PORT: port = 4000,
-  MONGO_URI: mongoURI,
-  COOKIE_SIGN_KEY: signKey
-} = process.env;
+
+console.log('mongo_URI',mongoURI)
 
 mongoose.Promise = global.Promise; // Node의 Promise를 사용하도록 설정
 mongoose.connect(mongoURI, { useNewUrlParser: true })

@@ -20,7 +20,7 @@ exports.checkObjectId = (ctx, next) =>{
     POST /api/posts
     {title, body}
 */
-exports.write = (ctx) => {
+exports.write = async (ctx) => {
     
     const schema = Joi.object().keys({
         title: Joi.string().required(), // 필수항목이라는 의미
