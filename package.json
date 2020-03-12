@@ -11,7 +11,10 @@
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^8.0.6",
     "koa-session": "^5.12.3",
-    "mongoose": "^5.8.9"
+    "mocha": "^7.1.0",
+    "mongoose": "^5.8.9",
+    "should": "^13.2.3",
+    "supertest": "^4.0.2"
   },
   "devDependencies": {
     "cross-env": "^6.0.3",
@@ -24,6 +27,7 @@
   },
   "scripts": {
     "start": "cross-env NODE_PATH=src node src",
+    "test": "node_modules/mocha/bin/mocha $(find src/routes -name '*.spec.js') --recursive -w",
     "start:dev": "cross-env NODE_PATH=src nodemon --watch src/ src/index.js"
   }
 }
