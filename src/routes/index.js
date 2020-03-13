@@ -1,14 +1,13 @@
-const Router = require('koa-router');
+// const Router = require('koa-router');
+// const api = new Router();
+const router = require('express').Router();
 const posts = require('./posts');
 const auth = require('./auth');
 
-const api = new Router();
-
 
 // 라우터 설정
-api.use('/posts', posts.routes());
-api.use('/auth',  auth.routes());
-
+router.use('/posts', posts);
+router.use('/auth',  auth);
 
 // 라우터를 내보낸다.
-module.exports = api;
+module.exports = router;

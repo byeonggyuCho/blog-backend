@@ -6,6 +6,8 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
     "joi": "^14.3.1",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
@@ -28,6 +30,6 @@
   "scripts": {
     "start": "cross-env NODE_PATH=src node src",
     "test": "node_modules/mocha/bin/mocha $(find src/routes -name '*.spec.js') --recursive -w",
-    "start:dev": "cross-env NODE_PATH=src nodemon --watch src/ src/index.js"
+    "start:dev": "cross-env NODE_PATH=src nodemon --watch src/ src/server.js"
   }
 }
