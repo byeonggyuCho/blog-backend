@@ -1,11 +1,12 @@
 const { ADMIN_PASS: adminPass } = process.env;
 
-exports.login = (req,res) => {
+import Joi from 'joi';
+import User from '../../models/user'
 
-    const { password } = req.params;
+export const login = (req,res) => {
 
-    console.log(req)
-    console.log(adminPass, password)
+    const { password } = req.body;
+
     if(adminPass === password ) {
         // 로그인에 성공하면 logged 값을 true로 설정한다.
         req.session.logged = true;
@@ -15,23 +16,25 @@ exports.login = (req,res) => {
 
     } else {
         req.status = 401; // Unathorized
-        console.log('ctrl: 2')
         res.send({
             success: false
         })
     }
 };
 
-exports.check = (req,res) => {
+export const check = (req,res) => {
+
     let result  = {
-        // ! 문자를 두 번 입력하여 값이 존재하지 않을 때도 false를 반환하도록 설정한다.
         logged: !!req.session.logged
     };
 
     res.send(result);
 };
 
-exports.logout = (req) => {
-    req.session = null;
+export const logout = (req) => {
+    req.session.destroy((err)=>{
+        if(err)
+            console.error(err);
+    })
     req.status = 204; // No Content
 };

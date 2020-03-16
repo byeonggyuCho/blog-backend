@@ -1,22 +1,29 @@
-const mongoose = require('mongoose');
-const express = require('express');
-const session = require('express-session');
-const config = require('./config/config.js')
-const routes = require('./routes');
-const { mongoURI, signKey} = config;
+import express from 'express';
+import session from 'express-session';
+import mongoose from 'mongoose';
+import config from './config/config'
+import routes from './routes'
+import bodyParser from 'body-parser'
+
+// const { mongoURI } = config;
+const { MOGO_URI: mongoURI } = process.env;
+
 const app = express();
 const router = express.Router();
 
-global.__base = __dirname + '/';
+// create application/json parser
+const jsonParser = bodyParser.json()
+
 
 mongoose.Promise = global.Promise; // Node의 Promise를 사용하도록 설정
 mongoose.connect(mongoURI, { 
   useNewUrlParser: true ,
+  useFindAndModify: false,
   useUnifiedTopology: true  // 뭘 의미?
 })
 .then(() => {
   console.log('connected to mongodb');
-}).catch((e) => {
+}).catch((e: any) => {
   console.error(e);
 });
 
@@ -24,8 +31,9 @@ mongoose.connect(mongoURI, {
 // 라우터 설정
 router.use('/api', routes); // api라우트 적용
 
+
 // 라우터 적용 전에 bodyParser 적용
-// app.use(bodyParser());
+app.use(jsonParser);
 
 const sessionConfig = {
   secret: 'keyboard cat', // 세션 암호화를 하는 키.
@@ -36,15 +44,14 @@ const sessionConfig = {
 
 // 상세 : https://github.com/koajs/sessoin
 app.use(session(sessionConfig));
-app.keys = [signKey];
 
 // app 인스턴스에 라우터 적용
 app.use(router);
 //.use(router.allowedMethods());
 
-app.use((err, req, res, next) =>{
+app.use((err: any, req: any, res: any, next: any) =>{
 
   res.json({message: err.message})
 })
 
-module.exports = app;
+export default  app;

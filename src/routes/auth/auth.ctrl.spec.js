@@ -3,15 +3,18 @@ const request = require('supertest');
 const app = require('../../app');
 
 
+describe('POST / login ', () => {
 
-describe('GET / login ', () => {
+    let {ADMIN_PASS : password ='11'} = process.env
 
-    let {ADMIN_PASS : password} = process.env
+    const agent = request.agent(app);
 
     it('first login check, it should be false', (done) => {
 
-        request(app).post('/api/auth/check')
+        agent
+            .post('/api/auth/check')
             .expect(200)
+            .expect('Content-Type', /json/)
             .end((err, res) => {
                 if(err){
                     throw err
@@ -24,10 +27,10 @@ describe('GET / login ', () => {
 
     it('is login test with collect password', (done) => {
 
-        console.log('password preCheck ', password)
-        request(app)
+        agent
             .post('/api/auth/login')
-            .send({password: password})
+            .send({password})
+            .set('Accept', 'application/json')
             .expect(200)
             .end((err, res) => {
                 if(err){
@@ -39,32 +42,4 @@ describe('GET / login ', () => {
             })
     })
 
-    it('is check login state again and should be true', (done) => {
-        request(app)
-            .post('/api/auth/check')
-            .end((err, res) => {
-                if(err){
-                    throw err
-                }
-
-                res.body.should.have.properties('logged');
-                res.body.logged.should.be.equal(true);
-                done();
-            })
-    })
 })
-
-
-// describe('POST /login', () => {
-//     it('should return 200 status code', (done) => {
-//         request(app)
-//             .get('/api/auth/login')
-//             .expect(200)
-//             .end((err,res) => {
-
-//                 if(err) throw err;
-//                 done();
-//             })
-//  //       (true).should.be.equal(true)
-//     })
-// })

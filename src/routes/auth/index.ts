@@ -8,4 +8,4 @@ router.post('/check', authCtrl.check);
 router.post('/logout', authCtrl.logout);
 
 // 비밀번호 인증 API
-module.exports = router;
+export default router;

@@ -5,18 +5,28 @@
   "author": "cater",
   "license": "MIT",
   "dependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.3",
+    "@types/express-session": "^1.17.0",
+    "@types/joi": "^14.3.4",
+    "@types/jsonwebtoken": "^8.3.8",
+    "@types/mongoose": "^5.7.6",
+    "@types/sanitize-html": "^1.22.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
     "joi": "^14.3.1",
-    "koa": "^2.11.0",
-    "koa-bodyparser": "^4.2.1",
-    "koa-router": "^8.0.6",
-    "koa-session": "^5.12.3",
+    "jsonwebtoken": "^8.5.1",
     "mocha": "^7.1.0",
     "mongoose": "^5.8.9",
+    "sanitize-html": "^1.22.1",
     "should": "^13.2.3",
-    "supertest": "^4.0.2"
+    "supertest": "^4.0.2",
+    "tslint": "^6.1.0",
+    "tslint-config-airbnb": "^5.11.2",
+    "types": "^0.1.0",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "cross-env": "^6.0.3",
@@ -28,8 +38,8 @@
     "nodemon": "^2.0.2"
   },
   "scripts": {
-    "start": "cross-env NODE_PATH=src node src",
+    "start": "tsc && cross-env NODE_PATH=src node dist/server.js",
     "test": "node_modules/mocha/bin/mocha $(find src/routes -name '*.spec.js') --recursive -w",
-    "start:dev": "cross-env NODE_PATH=src nodemon --watch src/ src/server.js"
+    "start:dev": "cross-env NODE_PATH=src nodemon --watch src/ dist/server.js"
   }
 }

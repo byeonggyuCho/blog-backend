@@ -1,8 +1,6 @@
-const postsCtrl = require('./posts.ctrl');
-
-// const Router = require('koa-router');
-// const posts = new Router();
-const router = require('express').Router();
+import * as postsCtrl  from './posts.ctrl';
+const express = require('express');
+const router = express.Router();
 
 const {list, read, checkObjectId, write, remove, update, checkLogin } = postsCtrl;
 
@@ -13,4 +11,4 @@ router.post('/',     checkLogin,     write);
 router.delete('/',   checkLogin,     checkObjectId, remove);
 router.patch('/',    checkLogin,     checkObjectId, update);
 
-module.exports = router;
+export default router;
