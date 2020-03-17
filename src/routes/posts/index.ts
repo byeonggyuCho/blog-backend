@@ -1,5 +1,5 @@
 import * as postsCtrl  from './posts.ctrl';
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
 const {list, read, checkObjectId, write, remove, update, checkLogin } = postsCtrl;

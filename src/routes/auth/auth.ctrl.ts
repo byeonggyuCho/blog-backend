@@ -1,9 +1,9 @@
 const { ADMIN_PASS: adminPass } = process.env;
 
-import Joi from 'joi';
-import User from '../../models/user'
+// import Joi from 'joi';
+// import User from '../../models/user'
 
-export const login = (req,res) => {
+export const login = (req: any,res: any) => {
 
     const { password } = req.body;
 
@@ -22,7 +22,7 @@ export const login = (req,res) => {
     }
 };
 
-export const check = (req,res) => {
+export const check = (req: any,res: any) => {
 
     let result  = {
         logged: !!req.session.logged
@@ -31,8 +31,8 @@ export const check = (req,res) => {
     res.send(result);
 };
 
-export const logout = (req) => {
-    req.session.destroy((err)=>{
+export const logout = (req: any) => {
+    req.session.destroy((err: any)=>{
         if(err)
             console.error(err);
     })

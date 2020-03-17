@@ -5,8 +5,8 @@ import config from './config/config'
 import routes from './routes'
 import bodyParser from 'body-parser'
 
-// const { mongoURI } = config;
-const { MOGO_URI: mongoURI } = process.env;
+const mongoURI:any = config.mongoURI;
+
 
 const app = express();
 const router = express.Router();
@@ -47,6 +47,7 @@ app.use(session(sessionConfig));
 
 // app 인스턴스에 라우터 적용
 app.use(router);
+
 //.use(router.allowedMethods());
 
 app.use((err: any, req: any, res: any, next: any) =>{

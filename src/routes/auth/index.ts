@@ -1,7 +1,7 @@
-const authCtrl = require('./auth.ctrl');
-// const Router = require('koa-router');
-// const auth = new Router();
-const router = require('express').Router();
+import * as authCtrl from './auth.ctrl'
+import express from 'express'
+
+const router = express.Router();
 
 router.post('/login', authCtrl.login);
 router.post('/check', authCtrl.check);

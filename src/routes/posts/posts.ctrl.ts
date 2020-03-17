@@ -1,7 +1,7 @@
 import Post from '../../models/post.js';
 import Joi  from 'joi';
 import mongoose  from 'mongoose';
-import  sanitizeHtml from 'sanitize-html';
+// import  sanitizeHtml from 'sanitize-html';
 
 
 const { ObjectId } = mongoose.Types;
@@ -77,7 +77,7 @@ export const write = async (req:any ,res:any) => {
     // 새 Post 인스턴스를 만듭니다.
     const post = new Post({
         title, 
-        body : sanitizeHtml(body, sanitizeOption), 
+        body : body, //sanitizeHtml(body, sanitizeOption), 
         tags,
     });
 
@@ -197,7 +197,8 @@ export const update = async (req:any,res:any ) => {
     const nextData = {...req.body };
 
     if(nextData.body){
-        nextData.body = sanitizeHtml(nextData.body);
+
+        nextData.body = nextData.body//`sanitizeHtml(nextData.body);
     }
 
 
