@@ -94,40 +94,44 @@ export const write = async (req:any ,res:any) => {
 /**
  * 포스트 목록 조회
  * GET /api/posts
- */
+*/
 export const list = async (req:any ,res:any) => {
     // page가 주어지니 않았다면 1로 간주한다.
     // query는 문자열 형태로 받아 오므로 숫자로 변환
     const page = parseInt(req.query.page || 1, 10);
-    const { tag } = req.query;
-
-
-    // query 조건 (where)
-    const query = tag ? {
-        tags: tag // tags 배열에 tag를 가진 포스트 찾기
-    } : {};
-
+    
+    
     // 잘못된 페이지가 주어졌다면 오류
     if(page < 1) {
         req.status = 400;
         return;
     }
+    const { tag, username } = req.query;
+
+    // query 조건 (where)
+    const query = {
+        ...(tag ? {tags: tag }: {}) // tags 배열에 tag를 가진 포스트 찾기
+    }
+
 
     try {
         const posts = await Post.find(query)
                             .sort({_id: -1})
                             .limit(10)
                             .skip((page - 1) * 10)
+                            .lean()
                             .exec();
                             
         const postCount = await Post.countDocuments().exec();
-        const limitBodyLength = (post:any) => ({
-            ...post,
-            body: post.body.length < 200 ? post.body : `${post.body.slice(0, 200)}...`
-        });
+
+        const removeHtmlAndShorten = (body: any)=>body.length < 200 ? body : `${body.slice(0, 200)}...`
+
         
         // 글자 제한.
-        let result  = posts.map(limitBodyLength);
+        let result  = posts.map((post:any) => ({
+            ...post,
+            body: removeHtmlAndShorten(post.body)
+        }));
 
         // 마지막 페이지 알려주기
         // req.set은 response header를 설정
@@ -147,9 +151,10 @@ export const read = async (req:any,res:any) => {
 
     try {
         const post = await Post.findById(id).exec();
+
         //포스트가 존재하지 않습니다.
         if(!post) {
-            req.status = 404;
+            res.status = 404;
             return;
         }
         // req.body = post;

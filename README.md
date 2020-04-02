@@ -5,6 +5,11 @@
     - 디버깅
     - 테스트 로직
 2. 테스트로직 작성
+3. JWT
+4. SRR
+5. Build Process 
+    - Webpack
+6. mongoose 정리.
 
 
 ## todo

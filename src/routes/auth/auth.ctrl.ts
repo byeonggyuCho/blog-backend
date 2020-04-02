@@ -31,10 +31,13 @@ export const check = (req: any,res: any) => {
     res.send(result);
 };
 
-export const logout = (req: any) => {
+export const logout = (req: any, res: any) => {
     req.session.destroy((err: any)=>{
         if(err)
             console.error(err);
     })
     req.status = 204; // No Content
+    res.send({
+        success : true
+    })
 };

@@ -1,6 +1,4 @@
-//require('dotenv').config();
 require('dotenv').config()
-// import 'dotenv/config'
 
 // configs 변수
 const config = {
