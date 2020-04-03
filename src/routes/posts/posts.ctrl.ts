@@ -187,6 +187,8 @@ export const update = async (req:any,res:any ) => {
     //PATCh 메서드는 주어진 필드만 교체한다.    
     const {id} = req.params;
 
+    console.log(`[POST_UPDATE] ${req.body}`)
+
     const schema = Joi.object().keys({
         title: Joi.string(),
         body: Joi.string(),
@@ -208,10 +210,10 @@ export const update = async (req:any,res:any ) => {
 
 
     try{
-        const post = await Post.findByIdAndRemove(id, {
-            strict: true
-            // 이 값을 설정해야 업데이트된 객체를 반환합니다.
-            // 설정하지 않으면 업데이터되기 전의 객체를 반환합니다.
+        const post = await Post.findByIdAndUpdate(id, nextData,{
+            new: true, 
+            // 이 값을 설정하면 업데이트된 데이터를 반환합니다.
+            // false 일 때에는 업데이트 되기 전의 데이터를 반환합니다.
         }).exec();
 
         //포스트가 존재하지 않을때
@@ -232,7 +234,7 @@ export const update = async (req:any,res:any ) => {
  */
  export const checkLogin = (req:any, res:any, next:any) => {
 
-    console.log('[System] checkLogin', req.session.logged)
+    console.log('[SYSTEM] posts.checkLogin', req.session.logged)
 
      if(!req.session.logged) {
          req.status = 401; // Unathorized

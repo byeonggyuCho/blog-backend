@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 Schema.Types.ObjectId
 const PostSchema = new Schema({
-  _id: Schema.Types.ObjectId,
+  // _id: Schema.Types.ObjectId,
   title: String,
   body: String,
   tags: [String], // 문자열로 이루어진 배열

@@ -8,7 +8,7 @@ router.get('/',      list);
 router.get('/:id',   checkObjectId,  read);
 // 로그인 여부 체크
 router.post('/',     checkLogin,     write);
-router.delete('/',   checkLogin,     checkObjectId, remove);
-router.patch('/',    checkLogin,     checkObjectId, update);
+router.patch('/:id',    checkLogin,     checkObjectId, update);
+router.delete('/:id',   checkLogin,     checkObjectId, remove);
 
 export default router;
