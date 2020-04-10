@@ -187,8 +187,6 @@ export const update = async (req:any,res:any ) => {
     //PATCh 메서드는 주어진 필드만 교체한다.    
     const {id} = req.params;
 
-    console.log(`[POST_UPDATE] ${req.body}`)
-
     const schema = Joi.object().keys({
         title: Joi.string(),
         body: Joi.string(),

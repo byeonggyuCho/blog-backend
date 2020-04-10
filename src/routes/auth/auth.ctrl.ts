@@ -29,7 +29,6 @@ export const check = (req: any,res: any) => {
     };
 
     console.log('[SYSTEM] auth.check_1', req.session.logged)
-    console.log('[SYSTEM] auth.check_2', result.logged)
 
     res.send(result);
 };
