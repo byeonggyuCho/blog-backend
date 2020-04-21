@@ -4,11 +4,20 @@ import mongoose from 'mongoose';
 import config from './config/config'
 import routes from './routes'
 import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
+import {jwtMiddleware} from '../src/lib/token'
 
 const mongoURI:any = config.mongoURI;
 
 
-const app = express();
+class App {
+  public application : express.Application;
+  constructor(){
+    this.application = express();
+  }
+}
+
+const app = new App().application;
 const router = express.Router();
 
 // create application/json parser
@@ -34,6 +43,10 @@ router.use('/api', routes); // api라우트 적용
 
 // 라우터 적용 전에 bodyParser 적용
 app.use(jsonParser);
+app.use(jwtMiddleware);
+
+// 쿠키파서
+app.use(cookieParser());
 
 const sessionConfig = {
   secret: 'keyboard cat', // 세션 암호화를 하는 키.

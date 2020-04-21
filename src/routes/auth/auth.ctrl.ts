@@ -1,44 +1,179 @@
 const { ADMIN_PASS: adminPass } = process.env;
+import {generateToken} from '../../lib/token'
+import {Request, Response} from "express"
+import Joi  from'joi';
+import Account  from '../../models/Account';
 
-// import Joi from 'joi';
-// import User from '../../models/user'
 
-export const login = (req: any,res: any) => {
+interface RouterInterface {
+    (req:Request, res:Response) : void
+}
 
-    const { password } = req.body;
+// 로컬 회원가입
+export const register:RouterInterface = async (req, res) => {
 
-    if(adminPass === password ) {
+   // 데이터 검증
+   const schema = Joi.object().keys({
+        username: Joi.string().alphanum().min(4).max(15).required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().required().min(6)
+    });
+
+    const result = Joi.validate(req.body, schema);
+
+    if(result.error) {
+        res.status(400);
+        res.send()
+    }
+  // 아이디 / 이메일 중복 체크
+    let existing = null;
+    try { 
+        // @ts-ignore
+        existing = await Account.findByEmailOrUsername(req.body);
+    } catch (e) {
+        console.error(e)
+    }
+
+    if(existing) {
+        // 중복되는 아이디/이메일이 있을 경우
+            res.status(409); // Conflict
+            // 어떤 값이 중복되었는지 알려줍니다
+            res.send ({
+                // @ts-ignore
+                key: existing.email === req.email ? 'email' : 'username'
+            });
+            return;
+        }
+
+    // 계정 생성
+    let account = null;
+    try {
+        // @ts-ignore
+        account = await Account.register(req.body);
+    } catch (e) {
+        console.error(e)
+    }
+
+   res.send(account.profile); // 프로필 정보로 응답합니다.
+};
+
+
+
+// 이메일 / 아이디 존재유무 확인
+export const exists:RouterInterface = async (req, res) => {
+    const { key, value } = req.params;
+    let account = null;
+
+    try {
+        // key 에 따라 findByEmail 혹은 findByUsername 을 실행합니다.
+        // @ts-ignore
+        account = await (key === 'email' ? Account.findByEmail(value) : Account.findByUsername(value));    
+    } catch (e) {
+       console.error(e)
+    }
+
+    res.send({
+        exists: account !== null
+    })
+};
+
+
+export const login: RouterInterface =  async (req ,res ) => {
+
+
+      // 데이터 검증
+      const schema = Joi.object().keys({
+            email: Joi.string().email().required(),
+            password: Joi.string().required()
+        });
+        
+    const result = Joi.validate(req.body, schema);
+
+    if(result.error) {
+        res.status (400); // Bad Request
+        return;
+    }
+
+    // TODO: 아이디패스워드 복호화로직 추가....
+
+
+
+    const { email, password } = req.body; 
+
+    let account = null;
+    try {
+        // 이메일로 계정 찾기
+        // @ts-ignore
+        account = await Account.findByEmail(email);
+    } catch (e) {
+        console.log(e)
+    }
+
+    const isValid = account  && account.validatePassword(password)
+
+    if(isValid) {
+
+        // 토큰 발급
+        let token = null;
+        try{
+             token =  await generateToken({})
+        }catch(e) {
+            // res.throw(e);
+            console.log(e)
+        }
+
+
         // 로그인에 성공하면 logged 값을 true로 설정한다.
-        req.session.logged = true;
+        // @ts-ignore
+        req.session.logeed = true
+        
+        res.cookie('access_token', token, {
+            maxAge: 1000 * 60 * 60 * 24 * 7,
+            httpOnly: true,
+        });
+
         res.send({
             success: true
         })
 
-    } else {
-        req.status = 401; // Unathorized
-        res.send({
-            success: false
-        })
     }
 };
 
-export const check = (req: any,res: any) => {
+export const check:RouterInterface = (req ,res ) => {
 
-    let result  = {
-        logged: !!req.session.logged
-    };
+    // @ts-ignore
+    const { user } = req
+    let session = req.session as Express.Session
 
-    console.log('[SYSTEM] auth.check_1', req.session.logged)
+    // console.log('[SYSTEM] auth.check_1', req.session.logged)
 
-    res.send(result);
+    if( !user ) {
+        res.status(403);
+        res.send({logged: false})
+    }else{
+        res.send({
+            logged: true, 
+            data: user.profile
+        })
+    }
+
 };
 
-export const logout = (req: any, res: any) => {
+export const logout: RouterInterface = (req, res) => {
+
+
+    // @ts-ignore
     req.session.destroy((err: any)=>{
         if(err)
             console.error(err);
     })
-    req.status = 204; // No Content
+
+    res.cookie('access_token', null, {
+        maxAge: 0, 
+        httpOnly: true
+    });
+
+    res.status(204); // No Content
     res.send({
         success : true
     })
