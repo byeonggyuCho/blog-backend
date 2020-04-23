@@ -2,7 +2,7 @@ const { ADMIN_PASS: adminPass } = process.env;
 import {generateToken} from '../../lib/token'
 import {Request, Response} from "express"
 import Joi  from'joi';
-import Account  from '../../models/Account';
+import Account  from '../../models/account';
 
 
 interface RouterInterface {
@@ -11,6 +11,7 @@ interface RouterInterface {
 
 // 로컬 회원가입
 export const register:RouterInterface = async (req, res) => {
+
 
    // 데이터 검증
    const schema = Joi.object().keys({
@@ -36,18 +37,22 @@ export const register:RouterInterface = async (req, res) => {
 
     if(existing) {
         // 중복되는 아이디/이메일이 있을 경우
-            res.status(409); // Conflict
-            // 어떤 값이 중복되었는지 알려줍니다
-            res.send ({
+        res.status(409); // Conflict
+        // 어떤 값이 중복되었는지 알려줍니다
+        res.send ({
+            error: {
                 // @ts-ignore
-                key: existing.email === req.email ? 'email' : 'username'
-            });
-            return;
-        }
+                message: `${existing.email === req.email ? 'email' : 'username'}이 중복되었습니다.`
+            }
+        });
+        return;
+    }
 
     // 계정 생성
     let account = null;
     try {
+
+        console.log('authCtrl:',req.body)
         // @ts-ignore
         account = await Account.register(req.body);
     } catch (e) {

@@ -43,7 +43,8 @@ function decodeToken(token:any) {
 }
 
 export const jwtMiddleware:ExpressMiddleware = async (req, res,  next) => {
-    const token = req.signedCookies.access_token; //access_token; // ctx 에서 access_token 을 읽어옵니다
+
+    const token = req.cookies && req.cookies.access_token; //access_token; // ctx 에서 access_token 을 읽어옵니다
     if(!token) return next(); // 토큰이 없으면 바로 다음 작업을 진행합니다.
 
     try {
@@ -62,7 +63,7 @@ export const jwtMiddleware:ExpressMiddleware = async (req, res,  next) => {
 
         // ctx.request.user 에 디코딩된 값을 넣어줍니다
         // @ts-ignore
-        req.user = decoded;
+        req.decoded = decoded;
     } catch (e) {
         // token validate 실패
         // @ts-ignore

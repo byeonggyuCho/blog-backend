@@ -1,4 +1,4 @@
-import Post from '../../models/post.js';
+import Post from '../../models/post';
 import Joi  from 'joi';
 import mongoose  from 'mongoose';
 // import  sanitizeHtml from 'sanitize-html';

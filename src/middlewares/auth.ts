@@ -1,6 +1,7 @@
 import jwt from'jsonwebtoken'
+import * as express from 'express'
 
-const authMiddleware = (req: any, res: any, next: any) => {
+const authMiddleware = (req: express.Request, res: express.Response, next: any) => {
     // read the token from header or url 
     const token = req.headers['x-access-token'] || req.query.token
 
@@ -13,7 +14,7 @@ const authMiddleware = (req: any, res: any, next: any) => {
     }
 
     // create a promise that decodes the token
-    const p = new Promise(
+    const p = new Promise<string>(
         (resolve, reject) => {
             jwt.verify(token, req.app.get('jwt-secret'), (err: Error, decoded : any) => {
                 if(err) reject(err)
@@ -32,7 +33,9 @@ const authMiddleware = (req: any, res: any, next: any) => {
 
     // process the promise
     p.then((decoded)=>{
-        req.decoded = decoded
+
+        console.log('auth',decoded)
+        req.params._decoded = decoded
         next()
     }).catch(onError)
 }

@@ -1,0 +1,16 @@
+{
+    "verbose": true,
+    "ignore": [
+        ".git",
+        "node_modules/**/node_modules"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "NODE_PATH": "src"
+      },
+    "execMap": {
+      "rb": "ruby",
+      "pde": "processing --sketch={{pwd}} --run"
+    },
+    "ext": "ts,json"
+  }

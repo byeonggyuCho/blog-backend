@@ -5,7 +5,7 @@ import config from './config/config'
 import routes from './routes'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
-import {jwtMiddleware} from '../src/lib/token'
+import {jwtMiddleware} from './lib/token'
 
 const mongoURI:any = config.mongoURI;
 

@@ -59,6 +59,8 @@ Account.statics.register = function({ username, email, password } : {username:st
         password: hash(password)
     });
 
+    console.log('[Mongoos]: userRegister', username, email, password)
+
     return account.save();
 };
 
