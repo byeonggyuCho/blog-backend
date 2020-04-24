@@ -41,8 +41,8 @@ export const register:RouterInterface = async (req, res) => {
         // 어떤 값이 중복되었는지 알려줍니다
         res.send ({
             error: {
-                // @ts-ignore
-                message: `${existing.email === req.email ? 'email' : 'username'}이 중복되었습니다.`
+                key: existing.email === req.body.email ? 'email' : 'username',
+                message: `${existing.email === req.body.email ? 'email' : 'username'}이 중복되었습니다.`
             }
         });
         return;

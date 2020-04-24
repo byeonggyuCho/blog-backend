@@ -41,7 +41,7 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "start": "nodemon  --config nodemon.json --watch src --delay 1 --exec 'ts-node' src/server.ts",
+    "start": "nodemon  --config nodemon.json --watch src --delay 1 --exec ts-node src/server.ts",
     "start_temp": "no   tsc && cross-env NODE_PATH=src node dist/server.js",
     "test": "node_modules/mocha/bin/mocha $(find src/routes -name '*.spec.js') --recursive -w",
     "start:dev": "tsc -w &&cross-env NODE_PATH=src nodemon --watch src/ dist/server.ts",
