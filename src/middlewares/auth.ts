@@ -35,7 +35,8 @@ const authMiddleware = (req: express.Request, res: express.Response, next: any) 
     p.then((decoded)=>{
 
         console.log('auth',decoded)
-        req.params._decoded = decoded
+        // @ts-ignore
+        res._decoded = decoded
         next()
     }).catch(onError)
 }

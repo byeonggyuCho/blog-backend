@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import mongoose from'mongoose';
+import {generateToken} from '../lib/token'
 const { Schema } = mongoose;
 const secretKey =  process.env.SECRET_KEY as string;
 
@@ -37,9 +38,18 @@ Account.statics.findByEmail = function(email: string) {
     return this.findOne({email}).exec();
 };
 
+Account.statics.findByUsername = function(username: string) {
+    return this.findOne({ 'profile.username': username }).exec();
+};
+
+
 Account.statics.findByEmailOrUsername = function({username, email}:{username:string, email:string}) {
+
+    console.log(username, email)
     return this.findOne({
         // $or 연산자를 통해 둘중에 하나를 만족하는 데이터를 찾습니다
+
+      
         $or: [
             { 'profile.username': username },
             { email }
@@ -70,5 +80,18 @@ Account.methods.validatePassword = function(password: string) {
     return this.password === hashed;
 };
 
+
+/**
+ * 토큰 발급
+ */
+Account.methods.generateToken = function() {
+    // JWT 에 담을 내용
+    const payload = {
+        _id: this._id,
+        profile: this.profile
+    };
+
+    return generateToken(payload, 'account');
+};
 
 export default mongoose.model('Account', Account);

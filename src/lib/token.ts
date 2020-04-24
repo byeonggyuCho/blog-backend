@@ -63,11 +63,11 @@ export const jwtMiddleware:ExpressMiddleware = async (req, res,  next) => {
 
         // ctx.request.user 에 디코딩된 값을 넣어줍니다
         // @ts-ignore
-        req.decoded = decoded;
+        res._decoded = decoded;
     } catch (e) {
         // token validate 실패
         // @ts-ignore
-        req.user = null;
+        res._decoded = null;
     }
 
     return next();

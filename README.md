@@ -3,13 +3,14 @@
 
 ## 단위테스트
 1. User
-    - 계정생성 (S)
+    - [S] 계정생성 (/api/auth/register)
+    - [S] 이메일 중복여부확인 (api/auth/exists/email/)
+    - [S] 아이디 중복여부확인 (api/auth/exists/username/)
     - 계정정보 수정
     - 회원탈퇴
     - 비밀번호 변경
 
 2. 로그인
-    - 이메일 중복여부확인
     - 토큰 생성.
         - 일반 토큰과 JWT와의 차이는 ?
 3. 로그아웃

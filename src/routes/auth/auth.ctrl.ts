@@ -59,6 +59,19 @@ export const register:RouterInterface = async (req, res) => {
         console.error(e)
     }
 
+
+    let token = null;
+    try {
+        token = await account.generateToken();
+    } catch (e) {
+        console.log(e)
+    }
+
+    res.cookie('access_token', token, { 
+        httpOnly: true, 
+        maxAge: 1000 * 60 * 60 * 24 * 7 
+    });
+
    res.send(account.profile); // 프로필 정보로 응답합니다.
 };
 
@@ -67,6 +80,8 @@ export const register:RouterInterface = async (req, res) => {
 // 이메일 / 아이디 존재유무 확인
 export const exists:RouterInterface = async (req, res) => {
     const { key, value } = req.params;
+
+
     let account = null;
 
     try {
@@ -121,33 +136,25 @@ export const login: RouterInterface =  async (req ,res ) => {
         // 토큰 발급
         let token = null;
         try{
-             token =  await generateToken({})
+             token =  await account.generateToken();
         }catch(e) {
             // res.throw(e);
             console.log(e)
         }
 
-
-        // 로그인에 성공하면 logged 값을 true로 설정한다.
-        // @ts-ignore
-        req.session.logeed = true
-        
         res.cookie('access_token', token, {
             maxAge: 1000 * 60 * 60 * 24 * 7,
             httpOnly: true,
         });
 
-        res.send({
-            success: true
-        })
-
+        res.send(account.profile)
     }
 };
 
 export const check:RouterInterface = (req ,res ) => {
 
     // @ts-ignore
-    const { user } = req
+    const { _decoded : user} = res
     let session = req.session as Express.Session
 
     // console.log('[SYSTEM] auth.check_1', req.session.logged)
@@ -156,10 +163,7 @@ export const check:RouterInterface = (req ,res ) => {
         res.status(403);
         res.send({logged: false})
     }else{
-        res.send({
-            logged: true, 
-            data: user.profile
-        })
+        res.send(user.profile)
     }
 
 };
