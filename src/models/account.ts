@@ -35,6 +35,7 @@ const Account = new Schema({
 
 
 Account.statics.findByEmail = function(email: string) {
+
     return this.findOne({email}).exec();
 };
 
@@ -45,7 +46,7 @@ Account.statics.findByUsername = function(username: string) {
 
 Account.statics.findByEmailOrUsername = function({username, email}:{username:string, email:string}) {
 
-    console.log(username, email)
+    console.log('findByEmailOrUsername',username, email)
     return this.findOne({
         // $or 연산자를 통해 둘중에 하나를 만족하는 데이터를 찾습니다
 

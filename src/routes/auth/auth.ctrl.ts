@@ -4,7 +4,6 @@ import {Request, Response} from "express"
 import Joi  from'joi';
 import Account  from '../../models/account';
 
-
 interface RouterInterface {
     (req:Request, res:Response) : void
 }
@@ -12,11 +11,12 @@ interface RouterInterface {
 // 로컬 회원가입
 export const register:RouterInterface = async (req, res) => {
 
-
+    console.log(req.body);
    // 데이터 검증
+   // 
    const schema = Joi.object().keys({
         username: Joi.string().alphanum().min(4).max(15).required(),
-        email: Joi.string().email().required(),
+        // email: Joi.string().email().required(),
         password: Joi.string().required().min(6)
     });
 
@@ -24,13 +24,17 @@ export const register:RouterInterface = async (req, res) => {
 
     if(result.error) {
         res.status(400);
-        res.send()
+        res.send(result.error)
+        return 
     }
   // 아이디 / 이메일 중복 체크
     let existing = null;
     try { 
+        const {username}  = req.body
         // @ts-ignore
-        existing = await Account.findByEmailOrUsername(req.body);
+        // existing = await Account.findByEmailOrUsername(req.body);
+        existing = await Account.findByUsername(username);
+        console.log('[Checking]',existing)
     } catch (e) {
         console.error(e)
     }
@@ -52,7 +56,7 @@ export const register:RouterInterface = async (req, res) => {
     let account = null;
     try {
 
-        console.log('authCtrl:',req.body)
+        // console.log('authCtrl:',req.body)
         // @ts-ignore
         account = await Account.register(req.body);
     } catch (e) {
@@ -62,7 +66,7 @@ export const register:RouterInterface = async (req, res) => {
 
     let token = null;
     try {
-        token = await account.generateToken();
+        token = await account.generateToken(req.body);
     } catch (e) {
         console.log(e)
     }
@@ -71,6 +75,7 @@ export const register:RouterInterface = async (req, res) => {
         httpOnly: true, 
         maxAge: 1000 * 60 * 60 * 24 * 7 
     });
+
 
    res.send(account.profile); // 프로필 정보로 응답합니다.
 };
@@ -101,16 +106,17 @@ export const exists:RouterInterface = async (req, res) => {
 export const login: RouterInterface =  async (req ,res ) => {
 
 
-      // 데이터 검증
-      const schema = Joi.object().keys({
-            email: Joi.string().email().required(),
-            password: Joi.string().required()
-        });
+    // 데이터 검증
+    const schema = Joi.object().keys({
+        // email: Joi.string().email().required(),
+        username: Joi.string().alphanum().min(4).max(15).required(),
+        password: Joi.string().required()
+    });
         
     const result = Joi.validate(req.body, schema);
 
     if(result.error) {
-        res.status (400); // Bad Request
+        res.status(400); // Bad Request
         return;
     }
 
@@ -118,17 +124,15 @@ export const login: RouterInterface =  async (req ,res ) => {
 
 
 
-    const { email, password } = req.body; 
-
+    const { username, password } = req.body; 
     let account = null;
     try {
         // 이메일로 계정 찾기
         // @ts-ignore
-        account = await Account.findByEmail(email);
+        account = await Account.findByUsername(username);
     } catch (e) {
         console.log(e)
     }
-
     const isValid = account  && account.validatePassword(password)
 
     if(isValid) {
@@ -142,20 +146,31 @@ export const login: RouterInterface =  async (req ,res ) => {
             console.log(e)
         }
 
+
         res.cookie('access_token', token, {
             maxAge: 1000 * 60 * 60 * 24 * 7,
             httpOnly: true,
         });
 
+        console.log('[LOGIN]',token)
+
         res.send(account.profile)
+    }else{
+        res.send({
+            message: 'login fail'
+        })
     }
 };
 
 export const check:RouterInterface = (req ,res ) => {
 
+
     // @ts-ignore
     const { _decoded : user} = res
-    let session = req.session as Express.Session
+
+    
+    console.log('[check]',user)
+    // let session = req.session as Express.Session
 
     // console.log('[SYSTEM] auth.check_1', req.session.logged)
 
@@ -172,10 +187,10 @@ export const logout: RouterInterface = (req, res) => {
 
 
     // @ts-ignore
-    req.session.destroy((err: any)=>{
-        if(err)
-            console.error(err);
-    })
+    // req.session.destroy((err: any)=>{
+    //     if(err)
+    //         console.error(err);
+    // })
 
     res.cookie('access_token', null, {
         maxAge: 0, 

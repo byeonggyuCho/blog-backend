@@ -1,8 +1,12 @@
 import Post from '../../models/post';
 import Joi  from 'joi';
 import mongoose  from 'mongoose';
+import {Request,Response} from 'express'
 // import  sanitizeHtml from 'sanitize-html';
 
+interface RouterInterface {
+    (req:Request, res:Response, next:()=>void) : void
+}
 
 const { ObjectId } = mongoose.Types;
 
@@ -31,12 +35,14 @@ const sanitizeOption = {
 };
 
 
-export const checkObjectId = (req:any, res:any, next:any) =>{
+export const checkObjectId = (req:Request, res:Response, next:any) =>{
     const { id } = req.params;
+
+    console.log('checkObjectId',id)
 
     // 검증 실패
     if (!ObjectId.isValid(id)) {
-        req.status = 400; // 400 Bad Request
+        res.status(400)// 400 Bad Request
         return null;
     }
 
@@ -48,8 +54,10 @@ export const checkObjectId = (req:any, res:any, next:any) =>{
     POST /api/posts
     {title, body}
 */
-export const write = async (req:any ,res:any) => {
+export const write = async (req:Request ,res:Response) => {
     
+
+    console.log('write',req.body)
 
     const schema = Joi.object().keys({
         title: Joi.string().required(), // 필수항목이라는 의미
@@ -65,29 +73,39 @@ export const write = async (req:any ,res:any) => {
 
     // 오류가 발생하면 오류 내용을 응답.
     if(result.error) {
-        res.status = 400;
-        res.body = result.error;
+        res.status(400);
+        res.send({
+            message: result.error.message
+        });
         return;
     }
 
     // REST API의 request body는 req.request.body에서 조회할 수 있습니다.
     const { title, body, tags } = req.body;
 
+    // @ts-ignore
+    const userInfo = res._decoded;
 
+    console.log('postCtrl',userInfo)
     // 새 Post 인스턴스를 만듭니다.
     const post = new Post({
         title, 
         body : body, //sanitizeHtml(body, sanitizeOption), 
         tags,
+        user: userInfo// _id, username
     });
 
 
+    
     try {
         await post.save(); // 데이터베이스에 등록합니다.
         res.send(post);
     } catch(e) {
         // 데이터베이스의 오류가 발생합니다.
-        throw new Error(e);
+        // throw new Error(e);
+        res.send({
+            message:e
+        })
     }
 };
 
@@ -95,15 +113,14 @@ export const write = async (req:any ,res:any) => {
  * 포스트 목록 조회
  * GET /api/posts
 */
-export const list = async (req:any ,res:any) => {
+export const list = async (req:Request ,res:Response) => {
     // page가 주어지니 않았다면 1로 간주한다.
     // query는 문자열 형태로 받아 오므로 숫자로 변환
     const page = parseInt(req.query.page || 1, 10);
     
-    
     // 잘못된 페이지가 주어졌다면 오류
     if(page < 1) {
-        req.status = 400;
+        res.status(400);
         return;
     }
     const { tag, username } = req.query;
@@ -146,7 +163,7 @@ export const list = async (req:any ,res:any) => {
  * 특정 포스트 조회
  * GET /api/posts/:id
  */
-export const read = async (req:any,res:any) => {
+export const read = async (req:Request,res:Response) => {
     const { id } = req.params;
 
     try {
@@ -154,7 +171,7 @@ export const read = async (req:any,res:any) => {
 
         //포스트가 존재하지 않습니다.
         if(!post) {
-            res.status = 404;
+            res.status(404);
             return;
         }
         // req.body = post;
@@ -168,11 +185,11 @@ export const read = async (req:any,res:any) => {
     특정 포스트 제거
     DELETE /api/postid/:id
 */
-export const remove = async (req:any,res:any) => {
+export const remove = async (req:Request,res:Response) => {
     const { id }= req.params;
     try{
         await Post.findByIdAndRemove(id).exec();
-        req.status = 204;
+        res.status(204);
     }catch(e) {
         throw new Error(e);
     }
@@ -183,7 +200,7 @@ export const remove = async (req:any,res:any) => {
  * PATCH /api/posts/:id
  * { title, body }
  */
-export const update = async (req:any,res:any ) => {
+export const update = async (req:Request,res:Response ) => {
     //PATCh 메서드는 주어진 필드만 교체한다.    
     const {id} = req.params;
 
@@ -195,7 +212,7 @@ export const update = async (req:any,res:any ) => {
 
     const result = Joi.validate(req.body, schema);
     if(result.error){
-        res.status = 400;
+        res.status(400);
         res.send(result.error)
     }
 
@@ -216,7 +233,7 @@ export const update = async (req:any,res:any ) => {
 
         //포스트가 존재하지 않을때
         if(!post){
-            req.status = 404;
+            res.status(404);
             return;
         }
 
@@ -230,13 +247,33 @@ export const update = async (req:any,res:any ) => {
 /**
  * 로그인 여부 체크
  */
- export const checkLogin = (req:any, res:any, next:any) => {
+//  export const checkLogin = (req:any, res:any, next:any) => {
 
-    console.log('[SYSTEM] posts.checkLogin', req.session.logged)
+//     console.log('[SYSTEM] posts.checkLogin', req.session.logged)
 
-     if(!req.session.logged) {
-         req.status = 401; // Unathorized
-         return null;
-     }
-     next();
- };
+//      if(!req.session.logged) {
+//          req.status = 401; // Unathorized
+//          return null;
+//      }
+//      next();
+//  };
+
+
+ export const checkLogin:RouterInterface = (req ,res,next ) => {
+
+
+    
+    // @ts-ignore
+    const { _decoded : user} = res
+
+    if( !user ) {
+        res.status(403);
+        res.send({logged: false})
+    }else{
+        console.log('[checkLogin]',user.profile.username)
+        // res.send(user.profile)
+        next();
+    }
+
+};
+

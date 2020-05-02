@@ -17,8 +17,9 @@
     - 토큰만료처리
 
 4. Post
-    - 생성
-    - 조회
+    - [S] 생성 (POST, /api/posts)
+    - [S] 개별조회 (GET, /api/posts/id)
+    - [S] 리스트조회 (GET, /api/posts)
     - 수정
 
 
@@ -43,6 +44,8 @@
 - 설계를 어떻게 할것인가??
     - 로그인 기능
     - 사이드 바.
+- jwt secretkey가 있는데 왜 디코드가 되는지?
+- post 로직 확인하기..
 
 ## mongodb on max with blew
 - https://velog.io/@rohkorea86/MongoDB%EC%84%A4%EC%B9%98-%EB%A7%A5MAC%EC%97%90%EC%84%9C-%EB%AA%BD%EA%B3%A0%EB%94%94%EB%B9%84-%EC%84%A4%EC%B9%98

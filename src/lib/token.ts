@@ -20,8 +20,10 @@ export function generateToken(payload : any, type?: string) {
                 payload,
                 jwtSecret,
                 {
-                    expiresIn: '7d'
-                }, (error, token) => {
+                    expiresIn: '7d',
+                    issuer: "Cater",
+                    subject: "userInfo"
+                }, (error:Error, token:string) => {
                     if(error) reject(error);
                     resolve(token);
                 }

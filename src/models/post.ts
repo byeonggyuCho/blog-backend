@@ -11,7 +11,10 @@ const PostSchema = new Schema({
   },
   user: {
     _id: mongoose.Types.ObjectId,
-    username: String,
+    profile: {
+      username: String,
+      thumbnail: { type: String, default: '/static/images/default_thumbnail.png' }
+    },
   },
 });
 
