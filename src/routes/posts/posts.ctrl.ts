@@ -35,10 +35,8 @@ const sanitizeOption = {
 };
 
 
-export const checkObjectId = (req:Request, res:Response, next:any) =>{
+export const checkObjectId:RouterInterface = (req, res, next) =>{
     const { id } = req.params;
-
-    console.log('checkObjectId',id)
 
     // 검증 실패
     if (!ObjectId.isValid(id)) {
@@ -57,8 +55,6 @@ export const checkObjectId = (req:Request, res:Response, next:any) =>{
 export const write = async (req:Request ,res:Response) => {
     
 
-    console.log('write',req.body)
-
     const schema = Joi.object().keys({
         title: Joi.string().required(), // 필수항목이라는 의미
         body: Joi.string().required(),
@@ -74,9 +70,7 @@ export const write = async (req:Request ,res:Response) => {
     // 오류가 발생하면 오류 내용을 응답.
     if(result.error) {
         res.status(400);
-        res.send({
-            message: result.error.message
-        });
+        res.send(result.error.message);
         return;
     }
 
@@ -86,7 +80,6 @@ export const write = async (req:Request ,res:Response) => {
     // @ts-ignore
     const userInfo = res._decoded;
 
-    console.log('postCtrl',userInfo)
     // 새 Post 인스턴스를 만듭니다.
     const post = new Post({
         title, 
@@ -102,10 +95,7 @@ export const write = async (req:Request ,res:Response) => {
         res.send(post);
     } catch(e) {
         // 데이터베이스의 오류가 발생합니다.
-        // throw new Error(e);
-        res.send({
-            message:e
-        })
+        res.send(e.message)
     }
 };
 
@@ -127,8 +117,13 @@ export const list = async (req:Request ,res:Response) => {
 
     // query 조건 (where)
     const query = {
-        ...(tag ? {tags: tag }: {}) // tags 배열에 tag를 가진 포스트 찾기
+        ...(tag ? {tags: tag }: {}), // tags 배열에 tag를 가진 포스트 찾기
+        // ...(username ? {user: {profile: {username}} }: {}), // tags 배열에 tag를 가진 포스트 찾기
+        ...(username ? { $where: `this.user.profile.username=== "${username}"` } : {}), // tags 배열에 tag를 가진 포스트 찾기
     }
+
+    // db.articles.find( { $where: `this.user.profile.username=== ${username}` } )
+    // 
 
 
     try {
@@ -141,8 +136,17 @@ export const list = async (req:Request ,res:Response) => {
                             
         const postCount = await Post.countDocuments().exec();
 
-        const removeHtmlAndShorten = (body: any)=>body.length < 200 ? body : `${body.slice(0, 200)}...`
+        // const removeHtmlAndShorten = (body: string)=>body.length < 200 ? body : `${body.slice(0, 200)}...`
 
+        const removeHtmlAndShorten = (text:string)=>{
+
+            text = text.replace(/<br\/>/ig, "\n");
+            text = text.replace(/<(\/)?([a-zA-Z]*)(\s[a-zA-Z]*=[^>]*)?(\s)*(\/)?>/ig, "");
+            text = text.length < 200 ? text : `${text.slice(0,200)}...`
+        
+            return text;
+        }
+          
         
         // 글자 제한.
         let result  = posts.map((post:any) => ({
@@ -177,7 +181,9 @@ export const read = async (req:Request,res:Response) => {
         // req.body = post;
         res.send(post);
     } catch(e) {
-        throw new Error(e);
+
+        res.status(400)
+        res.send(e.message)
     }
 };
 
@@ -191,7 +197,9 @@ export const remove = async (req:Request,res:Response) => {
         await Post.findByIdAndRemove(id).exec();
         res.status(204);
     }catch(e) {
-        throw new Error(e);
+        res.status(400)
+        res.send(e.message)
+        // throw new Error(e);
     }
 };
 
@@ -219,7 +227,6 @@ export const update = async (req:Request,res:Response ) => {
     const nextData = {...req.body };
 
     if(nextData.body){
-
         nextData.body = nextData.body//`sanitizeHtml(nextData.body);
     }
 
@@ -234,6 +241,7 @@ export const update = async (req:Request,res:Response ) => {
         //포스트가 존재하지 않을때
         if(!post){
             res.status(404);
+            res.send('포스트가 존재하지 않습니다.')
             return;
         }
 
@@ -257,18 +265,14 @@ export const update = async (req:Request,res:Response ) => {
 //      }
 //      next();
 //  };
-
-
  export const checkLogin:RouterInterface = (req ,res,next ) => {
 
-
-    
     // @ts-ignore
     const { _decoded : user} = res
 
     if( !user ) {
         res.status(403);
-        res.send({logged: false})
+        res.send('로그인되지 않았습니다.')
     }else{
         console.log('[checkLogin]',user.profile.username)
         // res.send(user.profile)

@@ -3,6 +3,7 @@ import {generateToken} from '../../lib/token'
 import {Request, Response} from "express"
 import Joi  from'joi';
 import Account  from '../../models/account';
+import Result from '../../lib/result';
 
 interface RouterInterface {
     (req:Request, res:Response) : void
@@ -11,9 +12,7 @@ interface RouterInterface {
 // 로컬 회원가입
 export const register:RouterInterface = async (req, res) => {
 
-    console.log(req.body);
    // 데이터 검증
-   // 
    const schema = Joi.object().keys({
         username: Joi.string().alphanum().min(4).max(15).required(),
         // email: Joi.string().email().required(),
@@ -43,12 +42,14 @@ export const register:RouterInterface = async (req, res) => {
         // 중복되는 아이디/이메일이 있을 경우
         res.status(409); // Conflict
         // 어떤 값이 중복되었는지 알려줍니다
-        res.send ({
-            error: {
-                key: existing.email === req.body.email ? 'email' : 'username',
-                message: `${existing.email === req.body.email ? 'email' : 'username'}이 중복되었습니다.`
-            }
-        });
+        // res.send ({
+        //     error: {
+        //         key: existing.email === req.body.email ? 'email' : 'username',
+        //         message: `${existing.email === req.body.email ? 'email' : 'username'}이 중복되었습니다.`
+        //     }
+        // });
+
+        res.send(`${existing.email === req.body.email ? 'email' : 'username'}이 중복되었습니다.`)
         return;
     }
 
@@ -117,12 +118,11 @@ export const login: RouterInterface =  async (req ,res ) => {
 
     if(result.error) {
         res.status(400); // Bad Request
+        res.send('로그인 정보가 잘못 되었습니다.')
         return;
     }
 
     // TODO: 아이디패스워드 복호화로직 추가....
-
-
 
     const { username, password } = req.body; 
     let account = null;
@@ -152,13 +152,18 @@ export const login: RouterInterface =  async (req ,res ) => {
             httpOnly: true,
         });
 
-        console.log('[LOGIN]',token)
+        // console.log('[LOGIN]',token)
 
         res.send(account.profile)
     }else{
-        res.send({
-            message: 'login fail'
-        })
+
+        res.cookie('access_token', null, {
+            maxAge: 0,
+            httpOnly: true,
+        });
+
+        res.status(400);
+        res.send('아이디 혹은 비밀번호가 잘못되었습니다.')
     }
 };
 
