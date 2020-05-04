@@ -24,8 +24,7 @@ export const register:RouterInterface = async (req, res) => {
 
     if(result.error) {
         re.setStatus('F').setMessage(result.error.message)
-        res.status(400);
-        res.send(re.getResult())
+        res.status(400).json(re.getResult())
         return 
     }
   // 아이디 / 이메일 중복 체크
@@ -52,7 +51,7 @@ export const register:RouterInterface = async (req, res) => {
         // });
 
         re.setStatus('F')
-            .setMessage(`${existing.email === req.body.email ? 'email' : 'username'}이 중복되었습니다.`)
+            .setMessage(`아이디가 중복되었습니다.`)
         res.send(re.getResult())
         return;
     }
@@ -202,14 +201,15 @@ export const logout: RouterInterface = (req, res) => {
 
 
     const re = new Result();
+
     // @ts-ignore
     // req.session.destroy((err: any)=>{
     //     if(err)
     //         console.error(err);
     // })
 
-    res.status(204); // No Content
-    res.cookie('access_token', null, {
+    // res.status(204); // No Content
+    res.cookie('access_token', '', {
         maxAge: 0, 
         httpOnly: true
     });

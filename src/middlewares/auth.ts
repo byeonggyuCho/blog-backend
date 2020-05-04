@@ -7,11 +7,11 @@ const authMiddleware = (req: express.Request, res: express.Response, next: any) 
     // read the token from header or url 
     const token = req.cookies['access_token'] || req.query.token
 
-    console.log('authMiddleware',token)
     // token does not exist
     if(!token) {
         return res.status(403).json({
             success: false,
+            status:'F',
             message: 'not logged in'
         })
     }
@@ -30,6 +30,7 @@ const authMiddleware = (req: express.Request, res: express.Response, next: any) 
     const onError = (error:Error) => {
         res.status(403).json({
             success: false,
+            status:'F',
             message: error.message
         })
     }
@@ -37,7 +38,6 @@ const authMiddleware = (req: express.Request, res: express.Response, next: any) 
     // process the promise
     p.then((decoded)=>{
 
-        console.log('auth',decoded)
         // @ts-ignore
         res._decoded = decoded
         next()

@@ -211,7 +211,10 @@ export const remove = async (req:Request,res:Response) => {
     const re = new Result();
     try{
         await Post.findByIdAndRemove(id).exec();
+
+        re.setData(true)
         res.status(204);
+        res.send(re.getResult())
     }catch(e) {
         res.status(400)
         re.setMessage(e.message).setStatus('F')
