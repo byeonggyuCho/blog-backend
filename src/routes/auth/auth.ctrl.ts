@@ -13,6 +13,7 @@ interface RouterInterface {
 export const register:RouterInterface = async (req, res) => {
 
    // 데이터 검증
+   const re = new Result();
    const schema = Joi.object().keys({
         username: Joi.string().alphanum().min(4).max(15).required(),
         // email: Joi.string().email().required(),
@@ -22,8 +23,9 @@ export const register:RouterInterface = async (req, res) => {
     const result = Joi.validate(req.body, schema);
 
     if(result.error) {
+        re.setStatus('F').setMessage(result.error.message)
         res.status(400);
-        res.send(result.error)
+        res.send(re.getResult())
         return 
     }
   // 아이디 / 이메일 중복 체크
@@ -40,7 +42,7 @@ export const register:RouterInterface = async (req, res) => {
 
     if(existing) {
         // 중복되는 아이디/이메일이 있을 경우
-        res.status(409); // Conflict
+        // res.status(409); // Conflict
         // 어떤 값이 중복되었는지 알려줍니다
         // res.send ({
         //     error: {
@@ -49,7 +51,9 @@ export const register:RouterInterface = async (req, res) => {
         //     }
         // });
 
-        res.send(`${existing.email === req.body.email ? 'email' : 'username'}이 중복되었습니다.`)
+        re.setStatus('F')
+            .setMessage(`${existing.email === req.body.email ? 'email' : 'username'}이 중복되었습니다.`)
+        res.send(re.getResult())
         return;
     }
 
@@ -77,8 +81,9 @@ export const register:RouterInterface = async (req, res) => {
         maxAge: 1000 * 60 * 60 * 24 * 7 
     });
 
+    re.setData(account.profile)
 
-   res.send(account.profile); // 프로필 정보로 응답합니다.
+   res.send(re.getResult()); // 프로필 정보로 응답합니다.
 };
 
 
@@ -86,7 +91,7 @@ export const register:RouterInterface = async (req, res) => {
 // 이메일 / 아이디 존재유무 확인
 export const exists:RouterInterface = async (req, res) => {
     const { key, value } = req.params;
-
+    const re = new Result();
 
     let account = null;
 
@@ -98,15 +103,17 @@ export const exists:RouterInterface = async (req, res) => {
        console.error(e)
     }
 
-    res.send({
+    re.setData({
         exists: account !== null
     })
+
+    res.send(re.getResult())
 };
 
 
 export const login: RouterInterface =  async (req ,res ) => {
 
-
+    const re = new Result();
     // 데이터 검증
     const schema = Joi.object().keys({
         // email: Joi.string().email().required(),
@@ -117,8 +124,10 @@ export const login: RouterInterface =  async (req ,res ) => {
     const result = Joi.validate(req.body, schema);
 
     if(result.error) {
-        res.status(400); // Bad Request
-        res.send('로그인 정보가 잘못 되었습니다.')
+        // res.status(400); // Bad Request
+        re.setStatus('F')
+            .setMessage('로그인 정보가 잘못 되었습니다.');
+        res.send(re.getResult())
         return;
     }
 
@@ -153,8 +162,8 @@ export const login: RouterInterface =  async (req ,res ) => {
         });
 
         // console.log('[LOGIN]',token)
-
-        res.send(account.profile)
+        re.setData(account.profile);
+        res.send(re.getResult())
     }else{
 
         res.cookie('access_token', null, {
@@ -162,8 +171,9 @@ export const login: RouterInterface =  async (req ,res ) => {
             httpOnly: true,
         });
 
-        res.status(400);
-        res.send('아이디 혹은 비밀번호가 잘못되었습니다.')
+        // res.status(400);
+        re.setStatus('F').setMessage('아이디 혹은 비밀번호가 잘못되었습니다.')
+        res.send(re.getResult())
     }
 };
 
@@ -172,18 +182,18 @@ export const check:RouterInterface = (req ,res ) => {
 
     // @ts-ignore
     const { _decoded : user} = res
-
-    
-    console.log('[check]',user)
-    // let session = req.session as Express.Session
-
-    // console.log('[SYSTEM] auth.check_1', req.session.logged)
+    const re = new Result();
 
     if( !user ) {
-        res.status(403);
-        res.send({logged: false})
+        // res.status(403);
+
+        re.setStatus('F')
+            .setData({logged:false})
+        res.send(re.getResult())
     }else{
-        res.send(user.profile)
+
+        re.setData(user.profile)
+        res.send(re.getResult())
     }
 
 };
@@ -191,19 +201,22 @@ export const check:RouterInterface = (req ,res ) => {
 export const logout: RouterInterface = (req, res) => {
 
 
+    const re = new Result();
     // @ts-ignore
     // req.session.destroy((err: any)=>{
     //     if(err)
     //         console.error(err);
     // })
 
+    res.status(204); // No Content
     res.cookie('access_token', null, {
         maxAge: 0, 
         httpOnly: true
     });
 
-    res.status(204); // No Content
-    res.send({
-        success : true
+    re.setData({
+        success: true
     })
+    
+    res.send(re.getResult())
 };

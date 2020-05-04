@@ -2,6 +2,7 @@ import Post from '../../models/post';
 import Joi  from 'joi';
 import mongoose  from 'mongoose';
 import {Request,Response} from 'express'
+import Result from '../../lib/result'
 // import  sanitizeHtml from 'sanitize-html';
 
 interface RouterInterface {
@@ -37,6 +38,7 @@ const sanitizeOption = {
 
 export const checkObjectId:RouterInterface = (req, res, next) =>{
     const { id } = req.params;
+    
 
     // 검증 실패
     if (!ObjectId.isValid(id)) {
@@ -54,7 +56,7 @@ export const checkObjectId:RouterInterface = (req, res, next) =>{
 */
 export const write = async (req:Request ,res:Response) => {
     
-
+    const re = new Result();
     const schema = Joi.object().keys({
         title: Joi.string().required(), // 필수항목이라는 의미
         body: Joi.string().required(),
@@ -69,8 +71,10 @@ export const write = async (req:Request ,res:Response) => {
 
     // 오류가 발생하면 오류 내용을 응답.
     if(result.error) {
-        res.status(400);
-        res.send(result.error.message);
+        // res.status(400);
+
+        re.setMessage(result.error.message).setStatus('F')
+        res.send(re.getResult());
         return;
     }
 
@@ -92,10 +96,13 @@ export const write = async (req:Request ,res:Response) => {
     
     try {
         await post.save(); // 데이터베이스에 등록합니다.
-        res.send(post);
+
+        re.setData(post)
+        res.send(re.getResult());
     } catch(e) {
         // 데이터베이스의 오류가 발생합니다.
-        res.send(e.message)
+        re.setMessage(e.message).setStatus('F')
+        res.send(re.getResult())
     }
 };
 
@@ -107,6 +114,7 @@ export const list = async (req:Request ,res:Response) => {
     // page가 주어지니 않았다면 1로 간주한다.
     // query는 문자열 형태로 받아 오므로 숫자로 변환
     const page = parseInt(req.query.page || 1, 10);
+    const re = new Result();
     
     // 잘못된 페이지가 주어졌다면 오류
     if(page < 1) {
@@ -154,10 +162,11 @@ export const list = async (req:Request ,res:Response) => {
             body: removeHtmlAndShorten(post.body)
         }));
 
+        re.setData(result)
+
         // 마지막 페이지 알려주기
-        // req.set은 response header를 설정
-        res.setHeader('Last-Page', Math.ceil(postCount / 10));
-        res.send(result);
+        res.setHeader('lastpage', Math.ceil(postCount / 10));
+        res.send(re.getResult());
     } catch(e) {
         throw e
     }
@@ -169,21 +178,27 @@ export const list = async (req:Request ,res:Response) => {
  */
 export const read = async (req:Request,res:Response) => {
     const { id } = req.params;
+    const re = new Result()
 
     try {
         const post = await Post.findById(id).exec();
 
         //포스트가 존재하지 않습니다.
         if(!post) {
-            res.status(404);
+            // res.status(404);
+            re.setMessage('포스트가 존재하지 않습니다.')
+            res.send(re.getResult())
             return;
         }
+
+        re.setData(post)
         // req.body = post;
-        res.send(post);
+        res.send(re.getResult());
     } catch(e) {
 
-        res.status(400)
-        res.send(e.message)
+        // res.status(400)
+        re.setMessage(e.message).setStatus('F')
+        res.send(re.getResult())
     }
 };
 
@@ -193,12 +208,14 @@ export const read = async (req:Request,res:Response) => {
 */
 export const remove = async (req:Request,res:Response) => {
     const { id }= req.params;
+    const re = new Result();
     try{
         await Post.findByIdAndRemove(id).exec();
         res.status(204);
     }catch(e) {
         res.status(400)
-        res.send(e.message)
+        re.setMessage(e.message).setStatus('F')
+        res.send(re.getResult())
         // throw new Error(e);
     }
 };
@@ -211,6 +228,7 @@ export const remove = async (req:Request,res:Response) => {
 export const update = async (req:Request,res:Response ) => {
     //PATCh 메서드는 주어진 필드만 교체한다.    
     const {id} = req.params;
+    const re = new Result()
 
     const schema = Joi.object().keys({
         title: Joi.string(),
@@ -220,8 +238,9 @@ export const update = async (req:Request,res:Response ) => {
 
     const result = Joi.validate(req.body, schema);
     if(result.error){
-        res.status(400);
-        res.send(result.error)
+        // res.status(400);
+        re.setMessage(result.error.message)
+        res.send(re.getResult())
     }
 
     const nextData = {...req.body };
@@ -240,8 +259,9 @@ export const update = async (req:Request,res:Response ) => {
 
         //포스트가 존재하지 않을때
         if(!post){
-            res.status(404);
-            res.send('포스트가 존재하지 않습니다.')
+            // res.status(404);
+            re.setMessage('포스트가 존재하지 않습니다.')
+            res.send(re.getResult())
             return;
         }
 
@@ -269,10 +289,12 @@ export const update = async (req:Request,res:Response ) => {
 
     // @ts-ignore
     const { _decoded : user} = res
+    const re = new Result();
 
     if( !user ) {
-        res.status(403);
-        res.send('로그인되지 않았습니다.')
+        // res.status(403);
+        re.setMessage('로그인되지 않았습니다.').setStatus('F');
+        res.send(re.getResult())
     }else{
         console.log('[checkLogin]',user.profile.username)
         // res.send(user.profile)

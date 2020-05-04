@@ -5,17 +5,17 @@
 export default class Result {
 
     constructor(msg:string= "", status = "S", data:any =null){
-        this.msg = msg;
+        this.message = msg;
         this.status = status;
         this.data = data;  
     }
 
-    msg:string
+    message:string
     status:string
     data:any
 
     setMessage(msg: string){
-        this.msg = msg
+        this.message = msg
         return this
     }
 
@@ -32,9 +32,9 @@ export default class Result {
     getResult(){
 
         return {
-            msg: this.msg,
+            message: this.message,
             data: this.data,
-            stats: this.status
+            status: this.status
         }
     }
 }
