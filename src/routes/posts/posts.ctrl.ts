@@ -242,7 +242,7 @@ export const update = async (req:Request,res:Response ) => {
     const result = Joi.validate(req.body, schema);
     if(result.error){
         // res.status(400);
-        re.setMessage(result.error.message)
+        re.setMessage(result.error.message).setStatus('F')
         res.send(re.getResult())
     }
 
@@ -268,7 +268,10 @@ export const update = async (req:Request,res:Response ) => {
             return;
         }
 
-        res.send(post)
+
+        re.setData(post)
+
+        res.send(re.getResult())
     }catch(e){
         throw new Error(e);
     }
