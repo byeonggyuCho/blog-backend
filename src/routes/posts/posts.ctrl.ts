@@ -3,6 +3,7 @@ import Joi  from 'joi';
 import mongoose  from 'mongoose';
 import {Request,Response} from 'express'
 import Result from '../../lib/result'
+import removeMd  from 'remove-markdown';
 // import  sanitizeHtml from 'sanitize-html';
 
 interface RouterInterface {
@@ -146,20 +147,25 @@ export const list = async (req:Request ,res:Response) => {
 
         // const removeHtmlAndShorten = (body: string)=>body.length < 200 ? body : `${body.slice(0, 200)}...`
 
-        const removeHtmlAndShorten = (text:string)=>{
+        // const removeHtmlAndShorten = (text:string)=>{
 
-            text = text.replace(/<br\/>/ig, "\n");
-            text = text.replace(/<(\/)?([a-zA-Z]*)(\s[a-zA-Z]*=[^>]*)?(\s)*(\/)?>/ig, "");
-            text = text.length < 200 ? text : `${text.slice(0,200)}...`
+        //     text = text.replace(/<br\/>/ig, "\n");
+        //     text = text.replace(/<(\/)?([a-zA-Z]*)(\s[a-zA-Z]*=[^>]*)?(\s)*(\/)?>/ig, "");
+        //     text = text.length < 200 ? text : `${text.slice(0,200)}...`
         
-            return text;
-        }
-          
+        //     return text;
+        // }
+        const removeMakrdwon = (mk:string)=>{
+            let planeText = removeMd(mk);
+            planeText = planeText.length < 200 ? planeText : `${planeText.slice(0,200)}...`
+            return planeText;
+        } 
+
         
         // 글자 제한.
         let result  = posts.map((post:any) => ({
             ...post,
-            body: removeHtmlAndShorten(post.body)
+            body: removeMakrdwon(post.body)
         }));
 
         re.setData(result)
